@@ -20,8 +20,17 @@ class GameActivity : AppCompatActivity() {
     private var playerName: String = "Герой"
     private var playerGender: String = "boy"
 
-    // Симпатия к персонажам
     private val affection = mutableMapOf<String, Int>()
+    private val flags = mutableSetOf<String>()
+
+    private var story: Map<String, Scene> = emptyMap()
+    private var currentSceneId: String = ""
+
+    // Имена персонажей для отображения
+    private val characterNames = mapOf(
+        "anya" to "Аня",
+        "kira" to "Кира"
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,65 +46,91 @@ class GameActivity : AppCompatActivity() {
         scrollText = findViewById(R.id.scrollText)
         layoutChoices = findViewById(R.id.layoutChoices)
 
-        // Стартуем с пролога
-        showScene("prologue")
+        // Загружаем историю
+        story = StoryLoader.load(this)
+        currentSceneId = StoryLoader.getStartSceneId()
+
+        showScene(currentSceneId)
     }
 
     private fun showScene(sceneId: String) {
-        val scene = StoryData.scenes[sceneId] ?: run {
+        val scene = story[sceneId] ?: run {
             finish()
             return
         }
+
+        currentSceneId = sceneId
 
         // Верхняя панель
         textDay.text = "День ${scene.day}"
         textLocation.text = scene.location
         updateAffectionText()
 
-        // Текст сцены — подставляем имя игрока
-        val personalText = scene.text
-            .replace("[name]", playerName)
-            .replace("[он_она]", if (playerGender == "boy") "он" else "она")
-        textScene.text = personalText
+        // Текст: разворачиваем §BOY§...§GIRL§... в нужный вариант
+        textScene.text = resolveText(scene.text)
 
-        // Прокрутка наверх
         scrollText.post { scrollText.scrollTo(0, 0) }
 
         // Кнопки вариантов
         layoutChoices.removeAllViews()
         for (choice in scene.choices) {
-            val btn = AppCompatButton(this).apply {
-                text = choice.text
-                setTextColor(resources.getColor(R.color.text_light, null))
-                textSize = 16f
-                isAllCaps = false
-                background = resources.getDrawable(R.drawable.bg_btn_pink, null)
-                stateListAnimator = null
-                elevation = 0f
-
-                val lp = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-                lp.setMargins(0, 6, 0, 6)
-                layoutParams = lp
-
-                setOnClickListener {
-                    handleChoice(choice)
-                }
+            // Проверяем условие, если есть
+            if (choice.condition != null && !flags.contains(choice.condition)) {
+                continue
             }
-            layoutChoices.addView(btn)
+            addChoiceButton(choice)
         }
     }
 
+    private fun resolveText(raw: String): String {
+        if (raw.startsWith("§BOY§")) {
+            val boyStart = "§BOY§".length
+            val girlMarker = raw.indexOf("§GIRL§")
+            val boyText = raw.substring(boyStart, girlMarker)
+            val girlText = raw.substring(girlMarker + "§GIRL§".length)
+            return if (playerGender == "boy") boyText else girlText
+        }
+        return raw
+    }
+
+    private fun addChoiceButton(choice: Choice) {
+        val btn = AppCompatButton(this).apply {
+            text = choice.text
+            setTextColor(resources.getColor(R.color.text_light, null))
+            textSize = 16f
+            isAllCaps = false
+            background = resources.getDrawable(R.drawable.bg_btn_pink, null)
+            stateListAnimator = null
+            elevation = 0f
+
+            val lp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.setMargins(0, 8, 0, 8)
+            layoutParams = lp
+
+            setOnClickListener {
+                handleChoice(choice)
+            }
+        }
+        layoutChoices.addView(btn)
+    }
+
     private fun handleChoice(choice: Choice) {
-        // Обновляем симпатию
-        if (choice.affectionTarget.isNotEmpty() && choice.affectionDelta != 0) {
-            val current = affection[choice.affectionTarget] ?: 0
-            affection[choice.affectionTarget] = (current + choice.affectionDelta).coerceIn(0, 100)
+        // Симпатия
+        for ((target, delta) in choice.affection) {
+            val current = affection[target] ?: 0
+            affection[target] = (current + delta).coerceIn(0, 100)
         }
 
-        if (choice.nextSceneId == "EXIT_TO_MENU") {
+        // Флаг
+        if (choice.setFlag != null) {
+            flags.add(choice.setFlag)
+        }
+
+        // Выход в меню
+        if (choice.next == "EXIT_TO_MENU") {
             val intent = Intent(this, MainActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
@@ -103,11 +138,17 @@ class GameActivity : AppCompatActivity() {
             return
         }
 
-        showScene(choice.nextSceneId)
+        showScene(choice.next)
     }
 
     private fun updateAffectionText() {
-        val anya = affection["anya"] ?: 0
-        textAffection.text = if (anya > 0) "💗 Аня: $anya" else ""
+        val parts = mutableListOf<String>()
+        for ((key, value) in affection) {
+            if (value > 0) {
+                val name = characterNames[key] ?: key
+                parts.add("💗 $name: $value")
+            }
+        }
+        textAffection.text = parts.joinToString("  ")
     }
 }
