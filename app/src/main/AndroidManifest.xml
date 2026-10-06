@@ -18,6 +18,14 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".CharacterCreateActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".GameActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

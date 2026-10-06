@@ -1,9 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">LoveRPG</string>
+
+    <!-- Главное меню -->
+    <string name="title_menu">LoveRPG</string>
+    <string name="subtitle_menu">История, в которой решаешь ты 💕</string>
     <string name="btn_new_game">Новая игра</string>
     <string name="btn_continue">Продолжить</string>
     <string name="btn_exit">Выход</string>
-    <string name="title_menu">LoveRPG</string>
-    <string name="subtitle_menu">История, в которой решаешь ты 💕</string>
+
+    <!-- Создание персонажа -->
+    <string name="create_title">Создай своего героя</string>
+    <string name="create_subtitle">Кто ты в этой истории?</string>
+    <string name="gender_boy">👦 Парень</string>
+    <string name="gender_girl">👧 Девушка</string>
+    <string name="name_hint">Введи своё имя…</string>
+    <string name="btn_start_story">Начать историю 💕</string>
+
+    <!-- Игра -->
+    <string name="game_placeholder">Скоро тут будет история…</string>
 </resources>

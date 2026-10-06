@@ -1,5 +1,6 @@
 package com.ivangames.loverpg
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -16,7 +17,7 @@ class MainActivity : AppCompatActivity() {
         val btnExit = findViewById<AppCompatButton>(R.id.btnExit)
 
         btnNewGame.setOnClickListener {
-            Toast.makeText(this, "Скоро: выбор пола и имени 💕", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, CharacterCreateActivity::class.java))
         }
 
         btnContinue.setOnClickListener {
