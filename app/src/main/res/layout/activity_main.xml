@@ -24,33 +24,40 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="48dp" />
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnNewGame"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:text="@string/btn_new_game"
         android:textColor="@color/text_light"
-        android:backgroundTint="@color/pink_primary"
         android:textSize="18sp"
-        android:layout_marginBottom="12dp" />
+        android:textStyle="bold"
+        android:background="@drawable/bg_btn_pink"
+        android:stateListAnimator="@null"
+        android:elevation="0dp"
+        android:layout_marginBottom="14dp" />
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnContinue"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:text="@string/btn_continue"
         android:textColor="@color/text_light"
-        android:backgroundTint="@color/bg_card"
         android:textSize="18sp"
-        android:layout_marginBottom="12dp" />
+        android:background="@drawable/bg_btn_dark"
+        android:stateListAnimator="@null"
+        android:elevation="0dp"
+        android:layout_marginBottom="14dp" />
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnExit"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:text="@string/btn_exit"
-        android:textColor="@color/text_light"
-        android:backgroundTint="@color/bg_card"
-        android:textSize="18sp" />
+        android:textColor="@color/pink_primary"
+        android:textSize="18sp"
+        android:background="@drawable/bg_btn_outline"
+        android:stateListAnimator="@null"
+        android:elevation="0dp" />
 
 </LinearLayout>
