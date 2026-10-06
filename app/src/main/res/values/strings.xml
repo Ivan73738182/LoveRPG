@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LoveRPG</string>
+    <string name="btn_new_game">Новая игра</string>
+    <string name="btn_continue">Продолжить</string>
+    <string name="btn_exit">Выход</string>
+    <string name="title_menu">LoveRPG</string>
+    <string name="subtitle_menu">История, в которой решаешь ты 💕</string>
+</resources>

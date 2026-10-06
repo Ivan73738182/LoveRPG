@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_dark">#1A1A2E</color>
+    <color name="bg_card">#16213E</color>
+    <color name="pink_primary">#E94560</color>
+    <color name="pink_soft">#FF6B9D</color>
+    <color name="text_light">#FFFFFF</color>
+    <color name="text_dim">#B0B0C0</color>
+</resources>
