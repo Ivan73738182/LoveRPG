@@ -19,14 +19,15 @@ class GameActivity : AppCompatActivity() {
 
     private var playerName: String = "Герой"
     private var playerGender: String = "boy"
+    private var currentDay: Int = 1
 
     private val affection = mutableMapOf<String, Int>()
     private val flags = mutableSetOf<String>()
+    private val usedTemplates = mutableSetOf<String>()
 
     private var story: Map<String, Scene> = emptyMap()
     private var currentSceneId: String = ""
 
-    // Имена персонажей для отображения
     private val characterNames = mapOf(
         "anya" to "Аня",
         "kira" to "Кира"
@@ -46,10 +47,10 @@ class GameActivity : AppCompatActivity() {
         scrollText = findViewById(R.id.scrollText)
         layoutChoices = findViewById(R.id.layoutChoices)
 
-        // Загружаем историю
         story = StoryLoader.load(this)
-        currentSceneId = StoryLoader.getStartSceneId()
+        ContentGenerator.load(this)
 
+        currentSceneId = StoryLoader.getStartSceneId()
         showScene(currentSceneId)
     }
 
@@ -58,26 +59,23 @@ class GameActivity : AppCompatActivity() {
             finish()
             return
         }
+        renderScene(scene)
+    }
 
-        currentSceneId = sceneId
+    private fun renderScene(scene: Scene) {
+        currentSceneId = scene.id
+        currentDay = scene.day
 
-        // Верхняя панель
         textDay.text = "День ${scene.day}"
         textLocation.text = scene.location
         updateAffectionText()
 
-        // Текст: разворачиваем §BOY§...§GIRL§... в нужный вариант
         textScene.text = resolveText(scene.text)
-
         scrollText.post { scrollText.scrollTo(0, 0) }
 
-        // Кнопки вариантов
         layoutChoices.removeAllViews()
         for (choice in scene.choices) {
-            // Проверяем условие, если есть
-            if (choice.condition != null && !flags.contains(choice.condition)) {
-                continue
-            }
+            if (choice.condition != null && !flags.contains(choice.condition)) continue
             addChoiceButton(choice)
         }
     }
@@ -110,9 +108,7 @@ class GameActivity : AppCompatActivity() {
             lp.setMargins(0, 8, 0, 8)
             layoutParams = lp
 
-            setOnClickListener {
-                handleChoice(choice)
-            }
+            setOnClickListener { handleChoice(choice) }
         }
         layoutChoices.addView(btn)
     }
@@ -125,9 +121,7 @@ class GameActivity : AppCompatActivity() {
         }
 
         // Флаг
-        if (choice.setFlag != null) {
-            flags.add(choice.setFlag)
-        }
+        if (choice.setFlag != null) flags.add(choice.setFlag)
 
         // Выход в меню
         if (choice.next == "EXIT_TO_MENU") {
@@ -138,7 +132,36 @@ class GameActivity : AppCompatActivity() {
             return
         }
 
+        // Генерация следующей сцены
+        if (choice.next == "__GENERATED__") {
+            generateNextScene()
+            return
+        }
+
+        // Обычная сцена из story.json
         showScene(choice.next)
+    }
+
+    /** Генерируем случайную сцену через ContentGenerator */
+    private fun generateNextScene() {
+        val generated = ContentGenerator.generateScene(
+            usedTemplateIds = usedTemplates,
+            affection = affection,
+            playerName = playerName,
+            playerGender = playerGender,
+            day = currentDay + 1
+        )
+
+        if (generated == null) {
+            // Все шаблоны израсходованы — идём в конец дня
+            showScene("day1_end_sleep")
+            return
+        }
+
+        // Запоминаем id шаблона (чтобы не повторялся)
+        ContentGenerator.extractTemplateId(generated.id)?.let { usedTemplates.add(it) }
+
+        renderScene(generated)
     }
 
     private fun updateAffectionText() {
